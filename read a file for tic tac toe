@@ -1,0 +1,116 @@
+#include <stdio.h>
+
+char board[3][3];
+
+void displayBoard() 
+{
+    printf("\nTic-Tac-Toe Board:\n");
+    for(int i = 0; i < 3; i++) {
+        for(int j = 0; j < 3; j++) {
+            printf("%c ", board[i][j]);
+        }
+        printf("\n");
+    }
+}
+
+int checkWinner() 
+{
+
+    for(int i = 0; i < 3; i++) 
+    {
+        if(board[i][0] == board[i][1] && board[i][1] == board[i][2] && board[i][0] != ' ') return 1;
+        if(board[0][i] == board[1][i] && board[1][i] == board[2][i] && board[0][i] != ' ') return 1;
+    }
+    
+    if(board[0][0] == board[1][1] && board[1][1] == board[2][2] && board[0][0] != ' ') return 1;
+    if(board[0][2] == board[1][1] && board[1][1] == board[2][0] && board[0][2] != ' ') return 1;
+    return 0;
+}
+
+void getInput(char player) 
+{
+    int row, col;
+    while(1) {
+        printf("Player %c, enter row and column (0-2) for your move: ", player);
+        scanf("%d %d", &row, &col);
+        if(row >= 0 && row < 3 && col >= 0 && col < 3 && board[row][col] == ' ') {
+            board[row][col] = player;
+            break;
+        } 
+        else 
+        {
+            printf("Invalid move, try again.\n");
+        }
+    }
+}
+
+void saveBoardToFile() 
+{
+    FILE *file = fopen("board.txt", "w");
+    if(file == NULL) {
+        printf("Error opening file.\n");
+        return;
+    }
+    for(int i = 0; i < 3; i++) 
+    {
+        for(int j = 0; j < 3; j++) 
+        {
+            fprintf(file, "%c ", board[i][j]);
+        }
+        fprintf(file, "\n");
+    }
+    fclose(file);
+}
+
+void loadBoardFromFile() 
+{
+    FILE *file = fopen("board.txt", "r");
+    if(file == NULL) {
+        printf("Error opening file. Initializing new board.\n");
+       
+        for(int i = 0; i < 3; i++) 
+        {
+            for(int j = 0; j < 3; j++) 
+            {
+                board[i][j] = ' ';
+            }
+        }
+    } 
+    else 
+    {
+        for(int i = 0; i < 3; i++) {
+            for(int j = 0; j < 3; j++) {
+                fscanf(file, " %c", &board[i][j]);
+            }
+        }
+        fclose(file);
+    }
+}
+
+int main()
+{
+    loadBoardFromFile();
+    int turn = 0;
+    char currentPlayer = 'X';
+    while(1) {
+        displayBoard();
+        getInput(currentPlayer);
+        saveBoardToFile();
+        
+        if(checkWinner())
+        {
+            displayBoard();
+            printf("Player %c wins!\n", currentPlayer);
+            break;
+        }
+        turn++;
+        if(turn == 9) 
+        {
+            displayBoard();
+            printf("It's a draw!\n");
+            break;
+        }
+            currentPlayer = (currentPlayer == 'X') ? 'O' : 'X';
+    }
+    return 0;
+}
